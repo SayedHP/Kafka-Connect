@@ -1,0 +1,48 @@
+https://docs.confluent.io/platform/current/connect/monitoring.html
+
+
+#config
+curl --request POST --url http://localhost:8083/connectors --header 'Content-Type: application/json' --data '{"name": "inventory-connector", "config": { "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+"tasks.max": "1", "database.hostname": "mysql", "database.port": "3306", "database.user": "debezium", "database.password": "dbz", "database.server.id": "184054", "database.server.name": "dbserver1", "database.include.list": "inventory", "database.history.kafka.bootstrap.servers": "redpanda:9092", "topic.prefix": "inventory", "database.history.skip.unparseable.ddl":"true", "wait_timeout": "60"}}'  
+
+"database.history.kafka.topic": "schema-changes.inventory"
+
+# update config
+curl --request POST --url http://localhost:8083/connectors --header 'Content-Type: application/json' --data '{"name": "inventory-connector", "config": { "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+"tasks.max": "1", "database.hostname": "mysql", "database.port": "3306", "database.user": "debezium", "database.password": "dbz", "database.server.id": "184054", "database.server.name": "dbserver1", "database.include.list": "inventory", "database.history.kafka.bootstrap.servers": "redpanda:9092", "topic.prefix": "inventory", "database.history.skip.unparseable.ddl":"true", "wait_timeout": "60"}}' localhost:8083/connectors/s3-connector/config
+
+####
+http://localhost:8083/connectors/inventory-connector:
+
+{
+  "name": "inventory-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.mysql.MySqlConnector",
+    "database.user": "debezium",
+    "database.server.id": "184054",
+    "tasks.max": "1",
+    "database.history.kafka.bootstrap.servers": "redpanda:9092",
+    "database.history.kafka.topic": "schema-changes.inventory",
+    "database.server.name": "dbserver1",
+    "database.port": "3306",
+    "topic.prefix": "inventory",
+    "database.hostname": "mysql",
+    "database.password": "dbz",
+    "name": "inventory-connector",
+    "database.include.list": "inventory"
+  },
+  "tasks": [
+    {
+      "connector": "inventory-connector",
+      "task": 0
+    }
+  ],
+  "type": "source"
+}
+
+####
+
+curl -XPOST http://localhost:8083/connectors/inventory-connector/restart
+curl -XPOST http://localhost:8083/connectors/inventory-connector/tasks/n/restart
+curl -XPUT  http://localhost:8083/connectors/inventory-connector/pause
+curl -XPUT  http://localhost:8083/connectors/inventory-connector/resume
